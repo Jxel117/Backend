@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       validate: { isEmail: true } 
     },
     password: { type: DataTypes.STRING, allowNull: false },
+    
     // --- NUEVOS CAMPOS ---
     isVerified: { 
       type: DataTypes.BOOLEAN, 
@@ -26,6 +27,12 @@ module.exports = (sequelize, DataTypes) => {
     verificationCode: { 
       type: DataTypes.STRING, 
       allowNull: true 
+    },
+    // ✅ CORRECCIÓN: 'avatar' ahora está DENTRO del objeto de configuración
+    avatar: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: null 
     }
   }, {
     sequelize,
@@ -38,6 +45,13 @@ module.exports = (sequelize, DataTypes) => {
           user.password = await bcrypt.hash(user.password, salt);
         }
       },
+      // (Opcional) Hook para encriptar si el usuario cambia la contraseña después
+      beforeUpdate: async (user) => {
+        if (user.changed('password')) {
+          const salt = await bcrypt.genSalt(10);
+          user.password = await bcrypt.hash(user.password, salt);
+        }
+      }
     },
   });
 

@@ -1,34 +1,35 @@
 const express = require('express');
 const { check } = require('express-validator');
-const auth = require('../middlewares/auth.middleware'); 
+const auth = require('../middlewares/auth.middleware');
 
+// Importamos TODO desde el controlador
 const { 
     register, 
     login, 
     verifyEmail, 
-    getProfile,
-    updateUser // <--- 🔥 IMPORTANTE: IMPORTAR ESTO
+    getProfile, 
+    updateUser 
 } = require('../controllers/auth.controller');
 
 const router = express.Router();
 
-// Ruta de Registro Manual
+// Registro
 router.post('/register', [
-    check('username', 'El usuario es requerido').not().isEmpty(),
-    check('email', 'Incluye un email válido').isEmail(),
-    check('password', 'Mínimo 6 caracteres').isLength({ min: 6 }),
-  ], register);
+    check('username', 'Usuario requerido').not().isEmpty(),
+    check('email', 'Email válido requerido').isEmail(),
+    check('password', 'Mínimo 6 caracteres').isLength({ min: 6 })
+], register);
 
-// Ruta de Login Manual
+// Login
 router.post('/login', login);
 
-// Ruta de Verificación de Código Manual
+// Verificar (si se usa)
 router.post('/verify', verifyEmail);
 
-// Ruta para obtener perfil (protegida)
+// Perfil (Protegida)
 router.get('/', auth, getProfile);
 
-// 🔥 RUTA NUEVA: ACTUALIZAR PERFIL (protegida)
+// Actualizar Perfil (Protegida) - Nombre y Avatar
 router.put('/update', auth, updateUser);
 
 module.exports = router;
