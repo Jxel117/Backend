@@ -39,16 +39,14 @@ app.get('/health', (req, res) => {
 // ⚠️ CAMBIO IMPORTANTE AQUÍ 👇
 // Usamos { alter: true } para que agregue la columna 'avatar' SI NO EXISTE,
 // pero MANTENIENDO tus usuarios actuales.
-db.sequelize.sync({ alter: true }) 
+db.sequelize.sync({ alter: false }) 
   .then(() => {
-    console.log('✅ Base de datos sincronizada (Estructura actualizada).');
+    console.log('✅ Base de datos sincronizada.');
     
-    // 6. Iniciar el Servidor
     app.listen(PORT, () => {
-      console.log(`🚀 Server is running on port ${PORT}.`);
-      console.log(`📄 API documentation available at http://localhost:${PORT}/api-docs`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   })
   .catch((err) => {
-    console.error('❌ Unable to connect to the database:', err);
+    console.error('❌ Error DB:', err);
   });

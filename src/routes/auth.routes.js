@@ -2,7 +2,7 @@ const express = require('express');
 const { check } = require('express-validator');
 const auth = require('../middlewares/auth.middleware');
 
-// Importamos el objeto completo para evitar errores de undefined
+// Importamos el OBJETO COMPLETO del controlador
 const authController = require('../controllers/auth.controller');
 
 const router = express.Router();
@@ -17,13 +17,13 @@ router.post('/register', [
 // Login
 router.post('/login', authController.login);
 
-// Verificar
+// Verificar (placeholder)
 router.post('/verify', authController.verifyEmail);
 
 // Perfil
 router.get('/', auth, authController.getProfile);
 
-// Actualizar
+// Actualizar Perfil (Nombre y Avatar)
 router.put('/update', auth, authController.updateUser);
 
 module.exports = router;
