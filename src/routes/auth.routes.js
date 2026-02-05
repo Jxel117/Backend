@@ -26,7 +26,7 @@ router.post('/login', login);
 router.post('/verify', verifyEmail);
 
 // Ruta de Login con Google
-router.post('/google', googleLogin);
+// router.post('/google', googleLogin);
 
 // --- AGREGAR ESTA RUTA PARA EL PERFIL ---
 // Esta usa 'auth' para verificar el token y devolver los datos del usuario
