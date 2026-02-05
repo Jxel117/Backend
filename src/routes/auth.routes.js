@@ -2,14 +2,8 @@ const express = require('express');
 const { check } = require('express-validator');
 const auth = require('../middlewares/auth.middleware');
 
-// Importamos TODO desde el controlador
-const { 
-    register, 
-    login, 
-    verifyEmail, 
-    getProfile, 
-    updateUser 
-} = require('../controllers/auth.controller');
+// Importamos el objeto completo para evitar errores de undefined
+const authController = require('../controllers/auth.controller');
 
 const router = express.Router();
 
@@ -18,18 +12,18 @@ router.post('/register', [
     check('username', 'Usuario requerido').not().isEmpty(),
     check('email', 'Email válido requerido').isEmail(),
     check('password', 'Mínimo 6 caracteres').isLength({ min: 6 })
-], register);
+], authController.register);
 
 // Login
-router.post('/login', login);
+router.post('/login', authController.login);
 
-// Verificar (si se usa)
-router.post('/verify', verifyEmail);
+// Verificar
+router.post('/verify', authController.verifyEmail);
 
-// Perfil (Protegida)
-router.get('/', auth, getProfile);
+// Perfil
+router.get('/', auth, authController.getProfile);
 
-// Actualizar Perfil (Protegida) - Nombre y Avatar
-router.put('/update', auth, updateUser);
+// Actualizar
+router.put('/update', auth, authController.updateUser);
 
 module.exports = router;
