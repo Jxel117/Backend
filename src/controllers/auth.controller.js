@@ -45,28 +45,59 @@ const register = async (req, res) => {
   }
 };
 
-// 2. LOGIN
+// 2. LOGIN CON LOGS DE DEPURACIÓN
 const login = async (req, res) => {
   const { email, password } = req.body;
+  
+  console.log("➡️ [LOGIN] Intento de acceso para:", email);
 
   try {
+    // 1. Buscar usuario
+    console.log("🔍 [LOGIN] Buscando usuario en BD...");
     const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(400).json({ success: false, message: 'Credenciales inválidas' });
+    
+    if (!user) {
+      console.log("❌ [LOGIN] Usuario no encontrado.");
+      return res.status(400).json({ success: false, message: 'Credenciales inválidas (Email)' });
+    }
+    console.log("✅ [LOGIN] Usuario encontrado (ID):", user.id);
 
+    // 2. Comparar contraseña
+    console.log("🔐 [LOGIN] Comparando contraseñas...");
+    // A veces esto tarda en servidores gratuitos
     const isMatch = await user.comparePassword(password);
-    if (!isMatch) return res.status(400).json({ success: false, message: 'Credenciales inválidas' });
+    
+    if (!isMatch) {
+      console.log("❌ [LOGIN] Contraseña incorrecta.");
+      return res.status(400).json({ success: false, message: 'Credenciales inválidas (Pass)' });
+    }
+    console.log("✅ [LOGIN] Contraseña correcta.");
 
+    // 3. Generar Token
+    console.log("🎫 [LOGIN] Generando Token...");
     const payload = { user: { id: user.id } };
+    
     jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' }, (err, token) => {
-      if (err) throw err;
+      if (err) {
+          console.error("❌ [LOGIN] Error firmando token:", err);
+          throw err;
+      }
+      
+      console.log("🚀 [LOGIN] Éxito! Enviando respuesta.");
       res.json({ 
         success: true, 
         token, 
-        user: { id: user.id, username, email, avatar: user.avatar } 
+        user: { 
+            id: user.id, 
+            username: user.username, 
+            email: user.email, 
+            avatar: user.avatar 
+        } 
       });
     });
+
   } catch (err) {
-    console.error(err);
+    console.error("🔥 [LOGIN] ERROR CRÍTICO:", err);
     res.status(500).json({ success: false, message: 'Error del servidor' });
   }
 };
