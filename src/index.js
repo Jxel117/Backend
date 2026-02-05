@@ -39,7 +39,7 @@ app.get('/health', (req, res) => {
 // ⚠️ CAMBIO IMPORTANTE AQUÍ 👇
 // Usamos { alter: true } para que agregue la columna 'avatar' SI NO EXISTE,
 // pero MANTENIENDO tus usuarios actuales.
-db.sequelize.sync({ alter: false }) 
+db.sequelize.sync({ alter: true }) 
   .then(() => {
     console.log('✅ Base de datos sincronizada.');
     
