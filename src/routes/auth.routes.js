@@ -1,13 +1,13 @@
 const express = require('express');
 const { check } = require('express-validator');
-const auth = require('../middlewares/auth.middleware'); // <--- AHORA ES UNA FUNCIÓN DIRECTA
+const auth = require('../middlewares/auth.middleware'); 
 
 const { 
     register, 
     login, 
     verifyEmail, 
-    googleLogin,
-    getProfile // <--- AGREGAR ESTO
+    getProfile,
+    updateUser // <--- 🔥 IMPORTANTE: IMPORTAR ESTO
 } = require('../controllers/auth.controller');
 
 const router = express.Router();
@@ -25,11 +25,10 @@ router.post('/login', login);
 // Ruta de Verificación de Código Manual
 router.post('/verify', verifyEmail);
 
-// Ruta de Login con Google
-// router.post('/google', googleLogin);
-
-// --- AGREGAR ESTA RUTA PARA EL PERFIL ---
-// Esta usa 'auth' para verificar el token y devolver los datos del usuario
+// Ruta para obtener perfil (protegida)
 router.get('/', auth, getProfile);
 
-module.exports = router;  
+// 🔥 RUTA NUEVA: ACTUALIZAR PERFIL (protegida)
+router.put('/update', auth, updateUser);
+
+module.exports = router;

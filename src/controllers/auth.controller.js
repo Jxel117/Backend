@@ -17,7 +17,7 @@ exports.register = async (req, res) => {
 
   const { username, email, password } = req.body;
 
-  // Validación de dominio @gmail.com (sin usar Google)
+  // Validación de dominio @gmail.com
   if (!email.toLowerCase().endsWith('@gmail.com')) {
     return res.status(400).json({ 
       success: false,
@@ -26,7 +26,6 @@ exports.register = async (req, res) => {
   }
 
   try {
-    // Verificar si el usuario ya existe
     let user = await User.findOne({ where: { email } });
     if (user) {
       return res.status(400).json({ 
@@ -35,7 +34,6 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Verificar si el username ya existe
     let existingUsername = await User.findOne({ where: { username } });
     if (existingUsername) {
       return res.status(400).json({ 
@@ -44,16 +42,14 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Crear usuario verificado (sin verificación por correo)
     user = await User.create({ 
       username, 
       email, 
-      password, // Se hashea automáticamente en el hook del modelo
-      isVerified: true, // Acceso inmediato
+      password, 
+      isVerified: true, 
       verificationCode: null 
     });
 
-    // Generar token JWT
     const payload = { user: { id: user.id } };
     
     jwt.sign(
@@ -63,7 +59,6 @@ exports.register = async (req, res) => {
       (err, token) => {
         if (err) throw err;
         
-        // Devolver datos del usuario sin contraseña
         const userData = {
           id: user.id,
           username: user.username,
@@ -95,7 +90,6 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
-  // Validaciones básicas
   if (!email || !password) {
     return res.status(400).json({ 
       success: false,
@@ -113,7 +107,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Verificar contraseña
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({ 
@@ -122,7 +115,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Verificar si la cuenta está activada (por si activas verificación después)
     if (!user.isVerified) {
       return res.status(403).json({ 
         success: false,
@@ -130,7 +122,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Generar token
     const payload = { user: { id: user.id } };
     jwt.sign(
       payload, 
@@ -197,7 +188,7 @@ exports.getProfile = async (req, res) => {
 };
 
 // ============================================
-// 4. VERIFICAR CÓDIGO (Opcional - para futuro)
+// 4. VERIFICAR CÓDIGO (Opcional)
 // ============================================
 exports.verifyEmail = async (req, res) => {
   const { email, code } = req.body;
@@ -231,6 +222,56 @@ exports.verifyEmail = async (req, res) => {
     res.status(500).json({ 
       success: false,
       message: 'Error del servidor' 
+    });
+  }
+};
+
+// ============================================
+// 5. ACTUALIZAR USUARIO (NUEVO) 🔥
+// ============================================
+exports.updateUser = async (req, res) => {
+  const { username } = req.body;
+
+  // Validación básica
+  if (!username || username.trim() === '') {
+    return res.status(400).json({
+      success: false,
+      message: 'El nombre de usuario es requerido'
+    });
+  }
+
+  try {
+    // Buscar usuario por ID (que viene del token)
+    const user = await User.findByPk(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Usuario no encontrado' 
+      });
+    }
+
+    // Actualizar campos
+    user.username = username;
+    
+    // Guardar cambios
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Perfil actualizado correctamente',
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email
+      }
+    });
+
+  } catch (err) {
+    console.error('Error actualizando usuario:', err);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error del servidor al actualizar' 
     });
   }
 };
